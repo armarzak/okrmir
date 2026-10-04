@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр по окружающему миру</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centred column like a workbook page; yellow lesson-header band as in the textbook, blue "Проверь себя" accent for controls */
+:root{
+  --bg:#EEF4E6; --surface:#FFFFFF; --ink:#1F2B22; --muted:#5B685D; --line:#D3DECA;
+  --accent:#1F7FBF; --accent-ink:#FFFFFF; --accent-soft:#E2F0FA;
+  --sun:#F7DB6A; --sun-ink:#4D3A00; --title:#C9502A;
+  --ok:#2C8547; --ok-bg:#E2F3E6; --bad:#C2412A; --bad-bg:#FBE5DF;
+  --f-display:"Unbounded","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Golos Text","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131915; --surface:#1C241E; --ink:#E7EEE3; --muted:#9BA89C; --line:#2E3A31;
+  --accent:#5CB2EA; --accent-ink:#08161F; --accent-soft:#1A2C38;
+  --sun:#E2BF45; --sun-ink:#231B00; --title:#F08B5E;
+  --ok:#5DC47C; --ok-bg:#1B3222; --bad:#F27B62; --bad-bg:#3A1F19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131915; --surface:#1C241E; --ink:#E7EEE3; --muted:#9BA89C; --line:#2E3A31;
+  --accent:#5CB2EA; --accent-ink:#08161F; --accent-soft:#1A2C38;
+  --sun:#E2BF45; --sun-ink:#231B00; --title:#F08B5E;
+  --ok:#5DC47C; --ok-bg:#1B3222; --bad:#F27B62; --bad-bg:#3A1F19; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+button{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.band{background:var(--sun);color:var(--sun-ink);border-radius:0 0 28px 28px;padding:22px 22px 20px;margin-top:-20px}
+.band .eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.band h1{font-size:clamp(24px,5.5vw,34px);font-weight:700;margin-top:6px;color:var(--sun-ink)}
+.band p{margin:8px 0 0;max-width:52ch}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.label{font-size:13px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+.topics{display:grid;gap:8px}
+.topic{display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.topic .box{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center}
+.topic[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.topic[aria-pressed="true"] .box{background:var(--accent);border-color:var(--accent)}
+.topic[aria-pressed="true"] .box::after{content:"";width:10px;height:6px;border:2.5px solid var(--accent-ink);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.topic .tname{font-weight:600;min-width:0;flex:1}
+.topic .tmeta{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.rowlinks{display:flex;gap:14px;margin-top:10px;font-size:14px}
+.link{background:none;border:0;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.modes{grid-template-columns:1fr}}
+.mode{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;background:transparent;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.mode b{font-size:17px}
+.mode span{font-size:14px;color:var(--muted)}
+.mode[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.seg{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.seg button{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 16px;cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:14px 22px;font-weight:700;font-size:17px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.wide{width:100%}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions .btn{flex:1 1 180px}
+
+/* quiz */
+.qtop{display:flex;align-items:center;gap:12px}
+.qtop .count{font-family:var(--f-display);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.qtopic{display:inline-block;font-size:13px;font-weight:600;color:var(--title);letter-spacing:.03em;text-transform:uppercase}
+.qtext{font-size:clamp(19px,4.2vw,22px);font-weight:600;line-height:1.35;margin:6px 0 4px;text-wrap:pretty}
+.hint{font-size:14px;color:var(--muted);margin-bottom:14px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;line-height:1.4}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--muted)}
+.opt.multi .k{border-radius:7px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .k{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.ok .k{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt.bad .k{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.opt:disabled{cursor:default}
+.opt span{min-width:0}
+
+.tray{min-height:56px;border:2px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tray .ph{color:var(--muted);font-size:14px;padding:4px 6px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.chip .n{font-family:var(--f-display);font-size:12px;color:var(--accent)}
+.tray .chip{border-color:var(--accent);background:var(--accent-soft)}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip:disabled{cursor:default}
+
+.match{display:grid;gap:10px}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+@media (max-width:480px){.mrow{grid-template-columns:1fr}}
+.mrow .ml{font-weight:600}
+.mrow select{width:100%;font:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.mrow.ok{border-color:var(--ok);background:var(--ok-bg)}
+.mrow.bad{border-color:var(--bad);background:var(--bad-bg)}
+.mrow .fix{grid-column:1/-1;font-size:14px;color:var(--bad);font-weight:600}
+
+.inp{width:100%;font:inherit;font-size:22px;font-family:var(--f-display);padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);letter-spacing:.04em}
+.inp.ok{border-color:var(--ok);background:var(--ok-bg)}
+.inp.bad{border-color:var(--bad);background:var(--bad-bg)}
+
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.fb.ok{background:var(--ok-bg)}
+.fb.bad{background:var(--bad-bg)}
+.fb .verdict{font-weight:700;font-size:18px}
+.fb.ok .verdict{color:var(--ok)}
+.fb.bad .verdict{color:var(--bad)}
+.fb .page{font-size:13px;color:var(--muted);font-weight:600}
+.quit{align-self:flex-start}
+
+/* results */
+.score{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.grade{flex:none;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:48px;font-weight:700;background:var(--sun);color:var(--sun-ink)}
+.score .big{font-family:var(--f-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.score p{margin:4px 0 0;color:var(--muted)}
+.tstats{display:grid;gap:10px}
+.ts{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.ts .tb{grid-column:1/-1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.ts .tb i{display:block;height:100%;border-radius:99px}
+.ts .v{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+.mist{display:grid;gap:12px}
+.mi{border-left:4px solid var(--bad);padding:2px 0 2px 12px}
+.mi .mq{font-weight:600}
+.mi .mg{color:var(--bad);font-size:15px}
+.mi .mc{color:var(--ok);font-size:15px;font-weight:600}
+.mi .mp{color:var(--muted);font-size:13px}
+.note{font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.pop{animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.97);opacity:.6}to{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const TOPICS = [
+  {id:"astro", name:"Мир глазами астронома", pages:"с. 6–9"},
+  {id:"planets", name:"Планеты Солнечной системы", pages:"с. 10–15"},
+  {id:"geo", name:"Мир глазами географа", pages:"с. 16–18"},
+  {id:"hist", name:"Мир глазами историка", pages:"с. 19–22"},
+  {id:"when", name:"Когда и где?", pages:"с. 23–26"},
+  {id:"eco", name:"Мир глазами эколога", pages:"с. 27–31"},
+  {id:"heritage", name:"Сокровища Земли под охраной человечества", pages:"с. 32–36"},
+  {id:"safety", name:"Человек и его безопасность", pages:"с. 37–40"}
+];
+
+/* type: single | multi | order | match | input. a = index / indices / order / pairs / accepted strings */
+const Q = [
+ // Астроном
+ {t:"astro",type:"single",q:"Астрономия — это наука о…",o:["небесных (космических) телах","растениях и животных","прошлом людей","земной поверхности"],a:0,e:"Астрономия изучает небесные, или космические, тела.",p:6},
+ {t:"astro",type:"single",q:"Слово «астрономия» состоит из греческих слов «астрон» и «номос». Что значит «астрон»?",o:["звезда","закон","небо","планета"],a:0,e:"«Астрон» — звезда, «номос» — закон.",p:6},
+ {t:"astro",type:"single",q:"Как с точки зрения астронома называют всё необъятное пространство со звёздами и планетами?",o:["Вселенная, или космос","Солнечная система","атмосфера","горизонт"],a:0,e:"Для астронома мир — это Вселенная, или космос.",p:6},
+ {t:"astro",type:"single",q:"Звёзды — это…",o:["огромные раскалённые небесные тела, излучающие свет","холодные тела, которые не светятся сами","спутники планет","кометы"],a:0,e:"Звёзды раскалённые и излучают свет. Планеты холодные и собственного света не излучают.",p:6},
+ {t:"astro",type:"single",q:"Сколько планет обращается вокруг Солнца?",o:["7","8","9","10"],a:1,e:"Вокруг Солнца по своим орбитам обращаются восемь планет.",p:6},
+ {t:"astro",type:"single",q:"Что такое Солнечная система?",o:["Солнце и все небесные тела, которые движутся вокруг него","все звёзды на небе","Земля и Луна","только 8 планет без Солнца"],a:0,e:"Солнце и движущиеся вокруг него небесные тела (планеты, кометы и другие) составляют Солнечную систему.",p:6},
+ {t:"astro",type:"single",q:"Солнце — это…",o:["ближайшая к Земле звезда","самая большая планета","спутник Земли","комета"],a:0,e:"Солнце — ближайшая к Земле звезда, огромное раскалённое космическое тело.",p:8},
+ {t:"astro",type:"single",q:"Во сколько раз диаметр Солнца больше диаметра Земли?",o:["в 11 раз","в 109 раз","в 318 раз","в 330 тысяч раз"],a:1,e:"Диаметр Солнца в 109 раз больше диаметра Земли. А масса — примерно в 330 тысяч раз больше.",p:8},
+ {t:"astro",type:"single",q:"Если представить Солнце размером с апельсин, то Земля будет размером с…",o:["маковое зёрнышко","горошину","вишню","яблоко"],a:0,e:"Земля по сравнению с Солнцем совсем маленькая, как маковое зёрнышко рядом с апельсином.",p:8},
+ {t:"astro",type:"single",q:"Почему Солнце кажется нам небольшим?",o:["оно очень далеко, около 150 миллионов километров","оно на самом деле маленькое","его закрывают облака","оно меньше Земли"],a:0,e:"Всё дело в огромном расстоянии: около 150 миллионов километров.",p:8},
+ {t:"astro",type:"single",q:"Какая температура на поверхности Солнца?",o:["около 100 градусов","около 1500 градусов","около 6 тысяч градусов","около 20 миллионов градусов"],a:2,e:"На поверхности Солнца около 6 тысяч градусов, а в центре — 15–20 миллионов градусов.",p:8},
+ {t:"astro",type:"single",q:"Как можно смотреть на Солнце?",o:["только через тёмные защитные очки и недолго, 1–2 минуты","в бинокль","в школьный телескоп","просто глазами, если прищуриться"],a:0,e:"Смотреть на Солнце в бинокль, подзорную трубу, телескоп и просто глазами запрещено: можно испортить зрение.",p:"8–9"},
+
+ // Планеты
+ {t:"planets",type:"order",q:"Расставь планеты по порядку, начиная с ближайшей к Солнцу.",o:["Меркурий","Венера","Земля","Марс","Юпитер","Сатурн","Уран","Нептун"],e:"Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун.",p:7},
+ {t:"planets",type:"single",q:"Какая планета самая большая?",o:["Сатурн","Юпитер","Земля","Нептун"],a:1,e:"Юпитер — самая большая планета. Его диаметр в 11 раз больше земного, а масса в 318 раз больше.",p:"10–11"},
+ {t:"planets",type:"single",q:"Какая планета самая маленькая?",o:["Марс","Меркурий","Венера","Земля"],a:1,e:"Самая маленькая планета — Меркурий, его диаметр 4880 километров.",p:11},
+ {t:"planets",type:"single",q:"Чему равен диаметр Земли?",o:["4880 км","12 740 км","150 миллионов км","109 км"],a:1,e:"Диаметр Земли равен 12 740 километрам.",p:10},
+ {t:"planets",type:"single",q:"Чем планеты отличаются от звёзд?",o:["не испускают собственного света, а отражают свет Солнца","они горячее звёзд","они всегда больше звёзд","их не видно с Земли"],a:0,e:"Планеты не испускают собственного света. Они лишь отражают свет Солнца.",p:10},
+ {t:"planets",type:"single",q:"Сколько спутников у Марса?",o:["ни одного","один","два","82"],a:2,e:"У Земли один спутник — Луна, у Марса два спутника.",p:11},
+ {t:"planets",type:"single",q:"У какой планеты рекордное число спутников — 82?",o:["Юпитер","Сатурн","Уран","Земля"],a:1,e:"У Сатурна было известно 62 спутника, в 2019 году открыли ещё 20. Всего 82.",p:11},
+ {t:"planets",type:"single",q:"Из чего состоят кольца Сатурна?",o:["из огромного числа кусков и глыб льда","из сплошного камня","из газа","из песка"],a:0,e:"Кольца кажутся сплошными, но состоят из кусков и глыб льда, которые движутся вокруг Сатурна.",p:11},
+ {t:"planets",type:"multi",q:"У каких планет тоже есть кольца, только менее заметные?",o:["Юпитер","Уран","Нептун","Марс","Венера"],a:[0,1,2],e:"Менее заметные кольца обнаружены у Юпитера, Урана и Нептуна.",p:11},
+ {t:"planets",type:"single",q:"Какая станция в 1959 году первой в мире достигла поверхности Луны?",o:["«Луна-2»","«Луна-3»","«Луноход-1»","«Восток»"],a:0,e:"В 1959 году первой достигла Луны советская станция «Луна-2».",p:11},
+ {t:"planets",type:"single",q:"Что впервые сделала станция «Луна-3» в 1959 году?",o:["сфотографировала обратную сторону Луны","привезла лунный грунт","высадила человека на Луну","облетела Марс"],a:0,e:"«Луна-3» впервые сфотографировала обратную сторону Луны, невидимую с Земли.",p:12},
+ {t:"planets",type:"single",q:"Кто первым ступил на Луну в 1969 году?",o:["Юрий Гагарин","Нил Армстронг","Луноход-1","Тур Хейердал"],a:1,e:"В 1969 году на Луну впервые ступил американский астронавт Нил Армстронг.",p:12},
+ {t:"planets",type:"single",q:"В каком году на Луну доставили «Луноход-1»?",o:["1959","1969","1970","1973"],a:2,e:"«Луноход-1» доставили на Луну в 1970 году, «Луноход-2» — в 1973 году.",p:12},
+ {t:"planets",type:"single",q:"Почему на Земле сменяются день и ночь?",o:["Земля вращается вокруг своей оси","Земля движется вокруг Солнца","Луна закрывает Солнце","Солнце гаснет на ночь"],a:0,e:"Из-за вращения Земли вокруг оси: освещённая сторона — день, сторона в тени — ночь.",p:"13–14"},
+ {t:"planets",type:"single",q:"За какое время Земля делает полный оборот вокруг своей оси?",o:["за час","за сутки","за месяц","за год"],a:1,e:"Полный оборот вокруг своей оси Земля совершает за сутки.",p:13},
+ {t:"planets",type:"single",q:"За какое время Земля делает полный оборот вокруг Солнца?",o:["за сутки","за неделю","за месяц","за год"],a:3,e:"Время полного оборота Земли вокруг Солнца равно одному году.",p:14},
+ {t:"planets",type:"single",q:"В какую сторону вращается Земля?",o:["с запада на восток","с востока на запад","с севера на юг","с юга на север"],a:0,e:"Земля вращается с запада на восток.",p:13},
+ {t:"planets",type:"single",q:"Что такое земная ось?",o:["воображаемая линия через Северный и Южный полюсы","экватор","путь Земли вокруг Солнца","настоящий стержень внутри Земли"],a:0,e:"Земную ось мысленно проводят через толщу Земли между Северным и Южным полюсами.",p:13},
+ {t:"planets",type:"single",q:"Почему на Земле сменяются времена года?",o:["Земля движется вокруг Солнца, а её ось наклонена","Земля вращается вокруг своей оси","Солнце то приближается, то улетает","из-за Луны"],a:0,e:"Из-за наклона оси Земля, двигаясь вокруг Солнца, подставляет ему то северную, то южную часть.",p:14},
+ {t:"planets",type:"single",q:"Когда в северной части Земли лето, в южной части…",o:["тоже лето","зима","весна","осень"],a:1,e:"Когда северная часть получает больше света и тепла, там лето, а в южной — зима. И наоборот.",p:14},
+ {t:"planets",type:"single",q:"На Марсе в среднем около −63°, а на Сатурне −139°. Почему на Сатурне холоднее?",o:["он намного дальше от Солнца","у него есть кольца","он меньше Марса","на нём всегда ночь"],a:0,e:"Чем дальше планета от Солнца, тем меньше тепла она получает.",p:15},
+
+ // География
+ {t:"geo",type:"single",q:"Как переводится слово «география» с греческого?",o:["землеописание","наука о звёздах","рассказ о прошедшем","дом природы"],a:0,e:"«Ге» — Земля, «графо» — пишу. Вместе — «землеописание».",p:16},
+ {t:"geo",type:"single",q:"Что изучает география?",o:["природу земной поверхности, население и его хозяйственную деятельность","небесные тела","прошлое людей","только реки и озёра"],a:0,e:"География изучает природу земной поверхности, население и его хозяйственную деятельность.",p:16},
+ {t:"geo",type:"single",q:"Где появилась одна из первых карт мира, примерно 2500 лет назад?",o:["в Древней Греции","в Германии","в России","в Китае"],a:0,e:"Одна из первых карт мира появилась в Древней Греции. Она имела форму круга, в центре была Греция.",p:17},
+ {t:"geo",type:"single",q:"Где появился первый глобус, известный сейчас учёным?",o:["в Германии более 500 лет назад","в Древней Греции 2500 лет назад","в России 400 лет назад","в Египте"],a:0,e:"Первый известный глобус появился более 500 лет назад в Германии и сохранился до наших дней.",p:17},
+ {t:"geo",type:"single",q:"Как называлась одна из первых географических карт России?",o:["«Старый чертёж»","«Новая карта»","«Книга о Земле»","«Глобус Руси»"],a:0,e:"Карта «Старый чертёж» не сохранилась, но осталась книга с её описанием — «Книга Большому чертежу».",p:17},
+ {t:"geo",type:"multi",q:"Что относится к географическим объектам?",o:["материки","острова","моря","реки","летописи","кометы"],a:[0,1,2,3],e:"Географические объекты: материки, острова, моря, реки, озёра и т. д.",p:17},
+ {t:"geo",type:"match",q:"Соедини вид карты с тем, что на ней показано.",pairs:[["Физическая карта","горы, равнины, реки, моря"],["Политическая карта","страны и их границы"],["Историческая карта","места битв и события прошлого"]],e:"Физическая — поверхность Земли, политическая — государства, историческая — события прошлого.",p:"18, 25"},
+ {t:"geo",type:"single",q:"С какого года существует Русское географическое общество?",o:["с 1703 года","с 1845 года","с 1918 года","с 2004 года"],a:1,e:"Русское географическое общество объединяет людей для изучения родной страны с 1845 года.",p:18},
+
+ // История
+ {t:"hist",type:"single",q:"Как переводится слово «история» с греческого?",o:["рассказ о прошедшем","землеописание","древний","закон звёзд"],a:0,e:"«История» в переводе с греческого — «рассказ о прошедшем».",p:19},
+ {t:"hist",type:"single",q:"Что такое исторический источник?",o:["всё, что может рассказать нам о прошлом людей","только учебник истории","источник воды в старом городе","любая новость из Интернета"],a:0,e:"Всё, что может рассказать нам о прошлом людей, называется историческим источником.",p:20},
+ {t:"hist",type:"multi",q:"Что может быть историческим источником?",o:["старинная монета","древняя рукопись","летопись","старые фотографии в твоём доме","пословицы и поговорки","прогноз погоды на завтра"],a:[0,1,2,3,4],e:"Источники — сооружения, рукописи, монеты, печати, сказания, названия, пословицы, старые книги и фотографии. Прогноз на завтра о прошлом не рассказывает.",p:"20–21"},
+ {t:"hist",type:"single",q:"Что такое архив?",o:["хранилище документов","древнее оружие","раскопки","музей картин"],a:0,e:"Архив — хранилище документов. Там хранятся древние рукописи и книги.",p:20},
+ {t:"hist",type:"single",q:"Когда на Руси появились летописи?",o:["около 100 лет назад","около 1000 лет назад","около 2500 лет назад","в 1961 году"],a:1,e:"Около тысячи лет назад на Руси появились летописи. Летописцы год за годом записывали события.",p:20},
+ {t:"hist",type:"single",q:"Слово «архео» переводится с греческого как…",o:["древний","земля","звезда","пишу"],a:0,e:"«Архео» — «древний».",p:20},
+ {t:"hist",type:"single",q:"Археология — это наука, которая…",o:["узнаёт о прошлом, изучая древние предметы и сооружения","изучает звёзды","изучает погоду","изучает животных"],a:0,e:"Археологи находят в земле остатки жилищ, посуду, украшения, монеты, орудия труда.",p:"20–21"},
+ {t:"hist",type:"single",q:"Как часто называют историю?",o:["памятью народа","землеописанием","наукой о звёздах","домом природы"],a:0,e:"Часто историю называют памятью народа.",p:20},
+ {t:"hist",type:"single",q:"С чем образно сравнивают историю в выражении «нить времён»?",o:["с нитью, на которую нанизаны события","с рекой","с лестницей","с деревом"],a:0,e:"История — как нить, на которую нанизываются тысячи событий. Она соединяет прошлое, настоящее и будущее.",p:20},
+
+ // Когда и где
+ {t:"when",type:"single",q:"Век (столетие) — это…",o:["10 лет","100 лет","1000 лет","10 веков"],a:1,e:"Век, столетие — сто лет.",p:23},
+ {t:"when",type:"single",q:"Тысячелетие — это…",o:["100 лет","10 веков","1000 веков","10 лет"],a:1,e:"Тысячелетие — тысяча лет, или 10 веков.",p:23},
+ {t:"when",type:"single",q:"Какими цифрами в истории принято записывать века?",o:["римскими","арабскими","любыми","словами"],a:0,e:"Годы обозначают арабскими цифрами, а века — римскими.",p:23},
+ {t:"when",type:"match",q:"Соедини римские и арабские цифры.",pairs:[["XIV","14"],["XIX","19"],["IX","9"],["XVII","17"],["XXI","21"]],e:"X = 10, V = 5, I = 1. Меньшая цифра перед большей вычитается: IX = 9, XIV = 14, XIX = 19.",p:23},
+ {t:"when",type:"input",q:"Москва впервые упоминается в летописи в 1147 году. В каком это веке? Напиши римскими цифрами.",acc:["XII","12"],show:"XII век",e:"1101–1200 годы — XII век.",p:25},
+ {t:"when",type:"input",q:"Санкт-Петербург основан в 1703 году. В каком это веке? Напиши римскими цифрами.",acc:["XVIII","18"],show:"XVIII век",e:"1701–1800 годы — XVIII век.",p:25},
+ {t:"when",type:"input",q:"Человек впервые побывал в космосе 12 апреля 1961 года. В каком это веке? Напиши римскими цифрами.",acc:["XX","20"],show:"XX век",e:"1901–2000 годы — XX век.",p:"23, 25"},
+ {t:"when",type:"single",q:"На какой век приходятся годы с 1501 по 1600?",o:["XV","XVI","XVII","XIV"],a:1,e:"Отрезок между 1501 и 1600 годами приходится на XVI (16-й) век.",p:24},
+ {t:"when",type:"single",q:"Что такое летосчисление?",o:["счёт лет","список летописей","счёт летних месяцев","карта событий"],a:0,e:"У разных народов был различный счёт лет — летосчисление.",p:23},
+ {t:"when",type:"single",q:"Кто установил в нашей стране счёт лет от Рождества Христова?",o:["Пётр Первый","Суворов","Нил Армстронг","летописцы Древней Руси"],a:0,e:"Счёт лет от Рождества Христова в нашей стране установил царь Пётр Первый.",p:24},
+ {t:"when",type:"single",q:"Какой год жители Древнего Рима считали первым годом своей истории?",o:["год основания Рима","год рождения царя","год первой летописи","год смены царя"],a:0,e:"Римляне считали первым годом год основания Рима. А египтяне вели счёт по годам правления царей.",p:"23–24"},
+ {t:"when",type:"single",q:"В каком году Россия перешла на современный календарь?",o:["в 1703","в 1845","в 1917","в 1918"],a:3,e:"В 1918 году Россия перешла на современный календарь: после 31 января сразу настало 14 февраля.",p:25},
+ {t:"when",type:"single",q:"Как на исторической карте обычно отмечают места битв?",o:["скрещёнными мечами","пунктирной линией","синим цветом","звёздочкой"],a:0,e:"Места битв отмечают скрещёнными мечами, а границы государств — пунктирной линией.",p:25},
+ {t:"when",type:"single",q:"События до рождения Иисуса Христа относят к…",o:["до нашей эры","нашей эре","XXI веку","первому тысячелетию нашей эры"],a:0,e:"Что произошло раньше рождения Христа — «до нашей эры», позднее — «наша эра».",p:24},
+
+ // Эколог
+ {t:"eco",type:"single",q:"Что такое экологическая проблема?",o:["опасное изменение в окружающей среде под влиянием человека","любая плохая погода","задача по математике о природе","нехватка денег на зоопарк"],a:0,e:"Экологическая проблема — опасное изменение в окружающей среде под влиянием человека.",p:28},
+ {t:"eco",type:"single",q:"Кем, по мнению учебника, был и всегда будет человек?",o:["сыном природы","покорителем природы","хозяином планеты","гостем на Земле"],a:0,e:"«Покорение» природы привело к её загрязнению. Человек был и всегда будет сыном природы.",p:27},
+ {t:"eco",type:"single",q:"На чём в 1969 году Тур Хейердал переплыл Атлантический океан и увидел, как он загрязнён?",o:["на папирусной лодке «Ра»","на подводной лодке","на ледоколе","на плоту «Кон-Тики»"],a:0,e:"Хейердал плыл на папирусной лодке «Ра» и видел в океане пластик, бутылки, банки и мазут.",p:28},
+ {t:"eco",type:"single",q:"Почему морские черепахи погибают от полиэтиленовых пакетов?",o:["принимают пакеты за медуз и проглатывают","пакеты пугают их","пакеты закрывают солнце","черепахи строят из них гнёзда"],a:0,e:"Черепахи глотают плавающие пакеты, принимая их за медуз, и погибают.",p:29},
+ {t:"eco",type:"single",q:"Какие леса называют «лёгкими» нашей планеты?",o:["тропические","хвойные","берёзовые рощи","городские парки"],a:0,e:"Тропические леса выделяют особенно много кислорода. В них живут 2/3 всех видов растений, животных и грибов.",p:29},
+ {t:"eco",type:"single",q:"Сколько деревьев, по некоторым подсчётам, каждый день падает под пилой?",o:["около 5 тысяч","около 5 миллионов","около 500","около 50"],a:1,e:"Каждый день под пилой падает около пяти миллионов деревьев.",p:29},
+ {t:"eco",type:"single",q:"Сколько мусора в год приходится на каждого жителя крупного города?",o:["около килограмма","около тонны","около 10 тонн","около 100 граммов"],a:1,e:"В год на каждого жителя крупного города приходится приблизительно тонна мусора.",p:29},
+ {t:"eco",type:"single",q:"Что изображено на эмблеме Всемирного фонда дикой природы (WWF)?",o:["панда","тигр","земной шар","дерево"],a:0,e:"Эмблема WWF — панда, одно из редких животных мира.",p:30},
+ {t:"eco",type:"single",q:"Где проводят День тигра в поддержку амурского тигра?",o:["в Приморском крае, во Владивостоке","в Москве","в Санкт-Петербурге","в Китае"],a:0,e:"День тигра проводится в Приморском крае. По улицам Владивостока проходит «тигриное» шествие.",p:30},
+ {t:"eco",type:"match",q:"Соедини дату и международный экологический день.",pairs:[["21 марта","День лесов"],["22 марта","День водных ресурсов"],["22 апреля","День Матери-Земли"],["5 июня","День окружающей среды"],["5 декабря","День почв"]],e:"Ещё 22 мая — Международный день биологического разнообразия.",p:31},
+ {t:"eco",type:"single",q:"Зачем проводят международные экологические дни?",o:["чтобы люди осознали, как важно охранять природу","чтобы не ходить в школу","чтобы посадить урожай","чтобы считать мусор"],a:0,e:"Цель таких мероприятий — помочь людям осознать, как важно охранять природу.",p:31},
+
+ // Наследие
+ {t:"heritage",type:"single",q:"Какой объект Всемирного наследия относится к природному наследию?",o:["Большой Барьерный риф","Московский Кремль","Великая Китайская стена","Венеция"],a:0,e:"Риф создан природой. Кремль, Китайская стена и Венеция созданы людьми — это культурное наследие.",p:"32–34"},
+ {t:"heritage",type:"multi",q:"Какие объекты Всемирного наследия находятся в России?",o:["Московский Кремль и Красная площадь","Западный Кавказ","«Ленские столбы»","Центральный Сихотэ-Алинь","Серенгети","Галапагосские острова"],a:[0,1,2,3],e:"Серенгети — в Танзании, Галапагосские острова — в Эквадоре.",p:"32–33"},
+ {t:"heritage",type:"match",q:"Соедини объект Всемирного наследия и страну.",pairs:[["Великая Китайская стена","Китай"],["Серенгети","Танзания"],["Большой Барьерный риф","Австралия"],["Галапагосские острова","Эквадор"],["Древний город Петра","Иордания"]],e:"Венеция — в Италии.",p:"32–33"},
+ {t:"heritage",type:"single",q:"Сколько объектов в Списке Всемирного наследия?",o:["около 50","около 100","более тысячи","ровно 12"],a:2,e:"В Списке Всемирного наследия более тысячи объектов природы и культуры.",p:32},
+ {t:"heritage",type:"single",q:"Кто подготовил Международную Красную книгу?",o:["Международный союз охраны природы (МСОП)","Русское географическое общество","Всемирный фонд дикой природы","учёные-астрономы"],a:0,e:"Её выпустил Международный союз охраны природы, поэтому она называется Красная книга МСОП.",p:34},
+ {t:"heritage",type:"single",q:"Что вносят в Международную Красную книгу?",o:["самые редкие виды растений и животных разных стран","все растения мира","домашних животных","памятники архитектуры"],a:0,e:"В Международную Красную книгу внесены самые редкие виды растений и животных разных стран.",p:34},
+ {t:"heritage",type:"multi",q:"Какие животные из учебника внесены в Международную Красную книгу?",o:["большая панда","белый носорог","орангутан","жук-геркулес","домашняя кошка","воробей"],a:[0,1,2,3],e:"Также там гребнистый крокодил, зелёная морская черепаха, орнитоптера Александры, белый орикс, дрофа, песчаная газель.",p:"35–36"},
+ {t:"heritage",type:"single",q:"Где в природе живёт большая панда?",o:["только в горных лесах Китая","в Африке","в Австралии","в тропических лесах Бразилии"],a:0,e:"Панда водится только в горных лесах Китая. В России её можно увидеть в Московском зоопарке.",p:"34–35"},
+ {t:"heritage",type:"single",q:"Почему панду называют бамбуковым медведем?",o:["её главная пища — ростки и корни бамбука","она живёт в бамбуковых домиках","у неё шерсть цвета бамбука","она умеет лазить только по бамбуку"],a:0,e:"Главная пища панды — тонкие ростки и корни бамбука.",p:34},
+
+ // Безопасность
+ {t:"safety",type:"multi",q:"Какие привычки полезные?",o:["соблюдать правила личной гигиены","делать утреннюю зарядку","быть пунктуальным","перебегать дорогу на красный свет","грубить","не выполнять обещания"],a:[0,1,2],e:"Грубость, необязательность и привычка перебегать дорогу на красный — вредные привычки.",p:"37–38"},
+ {t:"safety",type:"single",q:"Что значит быть пунктуальным?",o:["всегда приходить к назначенному времени","выполнять свои обещания","делать зарядку","говорить вежливо"],a:0,e:"Пунктуальный человек приходит вовремя и не заставляет других ждать.",p:37},
+ {t:"safety",type:"single",q:"Что значит быть обязательным?",o:["выполнять свои обещания, а если не получилось — объяснить и извиниться","всегда приходить вовремя","ходить в школу","слушаться только себя"],a:0,e:"Быть обязательным — значит выполнять свои обещания.",p:37},
+ {t:"safety",type:"single",q:"Какие сайты лучше выбирать для поиска информации?",o:["рекомендованные учителем и родителями, официальные сайты","сайты с самыми яркими заголовками","любые первые попавшиеся","сайты с рекламой"],a:0,e:"Лучше выбирать сайты, которые советуют учитель и родители, государственные образовательные ресурсы, сайты музеев и заповедников.",p:38},
+ {t:"safety",type:"single",q:"Чего лучше избегать в Интернете?",o:["информации с броскими, сенсационными заголовками","детских образовательных порталов","сайтов музеев","точно сформулированных запросов"],a:0,e:"За броскими сенсационными заголовками часто скрываются недостоверные или ложные сведения.",p:38},
+ {t:"safety",type:"single",q:"Какой пешеходный маршрут правильно выбрать?",o:["безопасный, где достаточно людей","самый короткий, через пустырь","через проходные дворы","по переполненной машинами дороге"],a:0,e:"Важнее наметить безопасный путь, чем короткий. Избегайте пустырей, проходных дворов и безлюдных мест.",p:38},
+ {t:"safety",type:"single",q:"С какой стороны нужно садиться в автомобиль и выходить из него?",o:["со стороны тротуара","со стороны дороги","с любой","через багажник"],a:0,e:"Садиться в автомобиль и выходить из него нужно со стороны тротуара.",p:39},
+ {t:"safety",type:"single",q:"Где можно кататься на велосипеде детям от 7 до 14 лет?",o:["по тротуарам, пешеходным и велосипедным дорожкам","по проезжей части дороги","по трамвайным путям","везде, где хочется"],a:0,e:"Детям 7–14 лет запрещено выезжать на проезжую часть дороги.",p:39},
+ {t:"safety",type:"single",q:"Какая часть защитной экипировки велосипедиста самая важная?",o:["шлем","перчатки","наколенники","налокотники"],a:0,e:"Шлем — самая важная часть защитной экипировки.",p:39},
+ {t:"safety",type:"single",q:"Как велосипедисту правильно пересечь дорогу?",o:["сойти с велосипеда и перевезти его за руль по пешеходному переходу","быстро проехать на велосипеде","проехать по переходу, звоня в звонок","ехать, не держась за руль"],a:0,e:"Чтобы пересечь дорогу, нужно сойти с велосипеда и перевезти его за руль по пешеходному переходу.",p:39},
+ {t:"safety",type:"single",q:"Можно ли катать друга на раме или багажнике велосипеда?",o:["нельзя, это запрещено правилами дорожного движения","можно, если медленно","можно, если друг лёгкий","можно только во дворе"],a:0,e:"Катать кого-то на раме или багажнике запрещено правилами дорожного движения.",p:40},
+ {t:"safety",type:"single",q:"Ты потерялся в торговом центре, а телефона нет. Что делать?",o:["обратиться к сотруднику: охраннику, продавцу, в информационную службу","уйти домой одному","пойти с первым встречным","спрятаться и ждать"],a:0,e:"Без телефона нужно обратиться к сотруднику: охраннику, продавцу или в информационную службу.",p:40},
+ {t:"safety",type:"single",q:"Что делать, если незнакомец пытается увести тебя силой?",o:["сопротивляться, вырываться, громко звать на помощь","молчать","идти с ним","попросить его отпустить шёпотом"],a:0,e:"Нужно сопротивляться, вырываться и громко звать на помощь. Никуда не ходи с незнакомыми людьми.",p:40},
+ {t:"safety",type:"single",q:"Синий круглый знак с изображением велосипеда обозначает…",o:["велосипедную дорожку","пешеходную дорожку","пешеходную зону","велосипедный магазин"],a:0,e:"Велосипедная дорожка обозначается знаком с велосипедом, а также дорожной разметкой.",p:39}
+];
+Q.forEach((q,i)=>q.id=i);
+
+const LETTERS="АБВГДЕЖЗ";
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => {a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const topicName = id => TOPICS.find(t=>t.id===id).name;
+
+let settings = {topics:new Set(TOPICS.map(t=>t.id)), mode:"train", count:20};
+let S = null; // session
+
+/* ---------- start screen ---------- */
+function renderStart(){
+  const counts = Object.fromEntries(TOPICS.map(t=>[t.id,Q.filter(q=>q.t===t.id).length]));
+  const avail = Q.filter(q=>settings.topics.has(q.t)).length;
+  app.innerHTML = `
+  <header class="band">
+    <div class="eyebrow">Окружающий мир · 4 класс · часть 1</div>
+    <h1>Готовимся к контрольной</h1>
+    <p>${Q.length} вопросов по учебнику, страницы 6–40. Выбери темы и режим.</p>
+  </header>
+  <section class="panel">
+    <div class="label">Темы</div>
+    <div class="topics">${TOPICS.map(t=>`
+      <button class="topic" data-t="${t.id}" aria-pressed="${settings.topics.has(t.id)}">
+        <span class="box"></span><span class="tname">${t.name}</span><span class="tmeta">${t.pages} · ${counts[t.id]}</span>
+      </button>`).join("")}
+    </div>
+    <div class="rowlinks"><button class="link" id="all">Выбрать все</button><button class="link" id="none">Снять все</button></div>
+  </section>
+  <section class="panel">
+    <div class="label">Режим</div>
+    <div class="modes">
+      <button class="mode" data-m="train" aria-pressed="${settings.mode==="train"}"><b>Тренировка</b><span>Сразу видно, верно или нет, и объяснение со страницей учебника</span></button>
+      <button class="mode" data-m="exam" aria-pressed="${settings.mode==="exam"}"><b>Контрольная</b><span>Ответы и оценка только в конце, как на настоящей проверке</span></button>
+    </div>
+    <div class="seg" role="group" aria-label="Сколько вопросов">
+      ${[10,20,0].map(n=>`<button data-c="${n}" aria-pressed="${settings.count===n}">${n?n+" вопросов":"Все ("+avail+")"}</button>`).join("")}
+    </div>
+  </section>
+  <button class="btn wide" id="go" ${avail?"":"disabled"}>${avail?"Начать":"Выбери хотя бы одну тему"}</button>`;
+  app.querySelectorAll(".topic").forEach(b=>b.onclick=()=>{const t=b.dataset.t;settings.topics.has(t)?settings.topics.delete(t):settings.topics.add(t);renderStart()});
+  $("#all").onclick=()=>{settings.topics=new Set(TOPICS.map(t=>t.id));renderStart()};
+  $("#none").onclick=()=>{settings.topics=new Set();renderStart()};
+  app.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{settings.mode=b.dataset.m;renderStart()});
+  app.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{settings.count=+b.dataset.c;renderStart()});
+  $("#go").onclick=()=>{
+    let pool = shuffle(Q.filter(q=>settings.topics.has(q.t)));
+    if(settings.count) pool = balancedPick(pool, settings.count);
+    startSession(pool, settings.mode);
+  };
+}
+// spread picks across chosen topics
+function balancedPick(pool,n){
+  if(pool.length<=n) return pool;
+  const by={}; pool.forEach(q=>(by[q.t]=by[q.t]||[]).push(q));
+  const keys=shuffle(Object.keys(by)); const out=[];
+  while(out.length<n){for(const k of keys){if(by[k].length&&out.length<n) out.push(by[k].shift())}}
+  return shuffle(out);
+}
+
+/* ---------- session ---------- */
+function startSession(list, mode, isRetry=false){
+  S = {list, mode, i:0, results:[], isRetry};
+  renderQ();
+}
+function prepare(q){
+  // per-question random layout
+  if(q.type==="single"||q.type==="multi") return {perm:shuffle(q.o.map((_,i)=>i))};
+  if(q.type==="order") return {pool:shuffle(q.o)};
+  if(q.type==="match") return {right:shuffle(q.pairs.map(p=>p[1]))};
+  return {};
+}
+function renderQ(){
+  const q=S.list[S.i]; const L=prepare(q);
+  S.cur={q,L,sel:q.type==="multi"?new Set():q.type==="order"?[]:q.type==="match"?{}:null,checked:false};
+  const n=S.list.length;
+  let body="", hint="";
+  if(q.type==="single"||q.type==="multi"){
+    hint = q.type==="multi"?"Выбери все верные ответы":"Выбери один ответ";
+    body = `<div class="opts">${L.perm.map((oi,k)=>`
+      <button class="opt ${q.type==="multi"?"multi":""}" data-o="${oi}" aria-pressed="false"><span class="k">${LETTERS[k]}</span><span>${esc(q.o[oi])}</span></button>`).join("")}</div>`;
+  } else if(q.type==="order"){
+    hint="Нажимай по очереди. Чтобы убрать, нажми на слово в рамке.";
+    body=`<div class="tray" id="tray"></div><div class="pool" id="pool"></div>`;
+  } else if(q.type==="match"){
+    hint="Для каждой строки выбери пару";
+    body=`<div class="match">${q.pairs.map((p,i)=>`
+      <div class="mrow" id="mr${i}"><div class="ml">${esc(p[0])}</div>
+      <select id="ms${i}" data-i="${i}" aria-label="${esc(p[0])}"><option value="">— выбери —</option>${L.right.map(r=>`<option>${esc(r)}</option>`).join("")}</select></div>`).join("")}</div>`;
+  } else if(q.type==="input"){
+    hint="Латинские буквы I, V, X. Можно и обычными цифрами.";
+    body=`<input class="inp" id="inp" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Например, XV">`;
+  }
+  app.innerHTML=`
+  <div class="qtop"><div class="count">${S.i+1} / ${n}</div><div class="bar"><i style="width:${(S.i)/n*100}%"></i></div></div>
+  <section class="panel pop">
+    <div class="qtopic">${esc(topicName(q.t))}</div>
+    <div class="qtext">${esc(q.q)}</div>
+    <div class="hint">${hint}</div>
+    ${body}
+  </section>
+  <div id="fbx"></div>
+  <button class="btn wide" id="act" disabled>${S.mode==="train"?"Проверить":"Дальше"}</button>
+  <button class="link quit" id="quit">Закончить и посмотреть результат</button>`;
+  wire(q,L);
+  $("#act").onclick=onAct;
+  $("#quit").onclick=renderResults;
+}
+function ready(){
+  const {q,sel}=S.cur;
+  if(q.type==="single") return sel!==null;
+  if(q.type==="multi") return sel.size>0;
+  if(q.type==="order") return sel.length===q.o.length;
+  if(q.type==="match") return q.pairs.every((_,i)=>sel[i]);
+  if(q.type==="input") return (sel||"").trim().length>0;
+}
+function refreshAct(){ if(!S.cur.checked) $("#act").disabled=!ready(); }
+function wire(q,L){
+  const cur=S.cur;
+  if(q.type==="single"||q.type==="multi"){
+    app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(cur.checked) return; const o=+b.dataset.o;
+      if(q.type==="single"){cur.sel=o;app.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b))}
+      else{cur.sel.has(o)?cur.sel.delete(o):cur.sel.add(o);b.setAttribute("aria-pressed",cur.sel.has(o))}
+      refreshAct();
+    });
+  } else if(q.type==="order"){
+    const draw=()=>{
+      $("#tray").innerHTML = cur.sel.length? cur.sel.map((w,i)=>`<button class="chip" data-w="${esc(w)}" ${cur.checked?"disabled":""}><span class="n">${i+1}</span>${esc(w)}</button>`).join("") : `<span class="ph">Здесь появится твой порядок</span>`;
+      $("#pool").innerHTML = L.pool.filter(w=>!cur.sel.includes(w)).map(w=>`<button class="chip" data-w="${esc(w)}">${esc(w)}</button>`).join("");
+      $("#tray").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{if(cur.checked)return;cur.sel=cur.sel.filter(x=>x!==c.dataset.w);draw()});
+      $("#pool").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{if(cur.checked)return;cur.sel.push(c.dataset.w);draw()});
+      refreshAct();
+    }; draw();
+  } else if(q.type==="match"){
+    app.querySelectorAll("select").forEach(s=>s.onchange=()=>{cur.sel[s.dataset.i]=s.value;refreshAct()});
+  } else if(q.type==="input"){
+    const inp=$("#inp"); inp.focus({preventScroll:true});
+    inp.oninput=()=>{cur.sel=inp.value;refreshAct()};
+    inp.onkeydown=e=>{if(e.key==="Enter"&&!$("#act").disabled)onAct()};
+  }
+}
+function normRoman(s){
+  return s.toUpperCase().replace(/\s|ВЕК|В\.?$/g,"").replace(/Х/g,"X").replace(/І/g,"I").replace(/[.]/g,"");
+}
+function grade(q,sel){
+  if(q.type==="single") return sel===q.a;
+  if(q.type==="multi") return sel.size===q.a.length && q.a.every(x=>sel.has(x));
+  if(q.type==="order") return sel.every((w,i)=>w===q.o[i]);
+  if(q.type==="match") return q.pairs.every((p,i)=>sel[i]===p[1]);
+  if(q.type==="input") return q.acc.includes(normRoman(sel||""));
+}
+function correctText(q){
+  if(q.type==="single") return q.o[q.a];
+  if(q.type==="multi") return q.a.map(i=>q.o[i]).join(", ");
+  if(q.type==="order") return q.o.join(" → ");
+  if(q.type==="match") return q.pairs.map(p=>p[0]+" — "+p[1]).join("; ");
+  if(q.type==="input") return q.show;
+}
+function givenText(q,sel){
+  if(q.type==="single") return sel===null?"—":q.o[sel];
+  if(q.type==="multi") return [...sel].sort((a,b)=>a-b).map(i=>q.o[i]).join(", ")||"—";
+  if(q.type==="order") return sel.join(" → ")||"—";
+  if(q.type==="match") return q.pairs.map((p,i)=>p[0]+" — "+(sel[i]||"?")).join("; ");
+  if(q.type==="input") return (sel||"").trim()||"—";
+}
+const PRAISE=["Верно!","Правильно!","Точно!","Молодец!","Так держать!"];
+const OOPS=["Не совсем.","Почти, но нет.","Ошибка, разберёмся."];
+function onAct(){
+  const cur=S.cur, q=cur.q;
+  if(cur.checked){ next(); return; }
+  if(!ready()) return;
+  const ok=grade(q,cur.sel);
+  S.results.push({q,ok,given:givenText(q,cur.sel)});
+  if(S.mode==="exam"){ next(); return; }
+  cur.checked=true;
+  // mark
+  if(q.type==="single"||q.type==="multi"){
+    const right=q.type==="single"?new Set([q.a]):new Set(q.a);
+    app.querySelectorAll(".opt").forEach(b=>{const o=+b.dataset.o;b.disabled=true;
+      const chosen=q.type==="single"?cur.sel===o:cur.sel.has(o);
+      if(right.has(o)) b.classList.add("ok"); else if(chosen) b.classList.add("bad");});
+  } else if(q.type==="order"){
+    app.querySelectorAll(".chip").forEach(c=>c.disabled=true);
+  } else if(q.type==="match"){
+    q.pairs.forEach((p,i)=>{const r=$("#mr"+i),s=$("#ms"+i);s.disabled=true;
+      if(cur.sel[i]===p[1]) r.classList.add("ok"); else {r.classList.add("bad");r.insertAdjacentHTML("beforeend",`<div class="fix">Правильно: ${esc(p[1])}</div>`)}});
+  } else if(q.type==="input"){
+    const i=$("#inp"); i.disabled=true; i.classList.add(ok?"ok":"bad");
+  }
+  const showRight = !ok && (q.type==="order"||q.type==="input");
+  $("#fbx").innerHTML=`<div class="fb ${ok?"ok":"bad"} pop">
+    <div class="verdict">${ok?PRAISE[Math.floor(Math.random()*PRAISE.length)]:OOPS[Math.floor(Math.random()*OOPS.length)]}</div>
+    ${showRight?`<div><b>Правильный ответ:</b> ${esc(correctText(q))}</div>`:""}
+    <div>${esc(q.e)}</div>
+    <div class="page">Учебник, с. ${q.p}</div></div>`;
+  const b=$("#act"); b.disabled=false; b.textContent = S.i+1<S.list.length?"Следующий вопрос":"Посмотреть результат"; b.focus({preventScroll:true});
+  $("#fbx").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"nearest"});
+}
+function next(){ S.i++; if(S.i<S.list.length){renderQ();window.scrollTo({top:0})} else renderResults(); }
+
+/* ---------- results ---------- */
+function mark(pct){ return pct>=90?5:pct>=70?4:pct>=50?3:2; }
+function renderResults(){
+  const R=S.results, n=R.length, good=R.filter(r=>r.ok).length;
+  if(!n){ renderStart(); return; }
+  const pct=Math.round(good/n*100), g=mark(pct);
+  const msg={5:"Отлично! Ты хорошо знаешь материал.",4:"Хорошо! Повтори темы, где были ошибки.",3:"Неплохо, но стоит ещё потренироваться.",2:"Давай повторим учебник и попробуем ещё раз."}[g];
+  const by={}; R.forEach(r=>{(by[r.q.t]=by[r.q.t]||{ok:0,n:0}); by[r.q.t].n++; if(r.ok) by[r.q.t].ok++;});
+  const wrong=R.filter(r=>!r.ok);
+  app.innerHTML=`
+  <header class="band">
+    <div class="eyebrow">${S.isRetry?"Работа над ошибками":S.mode==="exam"?"Контрольная":"Тренировка"} · итог</div>
+    <h1>Результат</h1>
+  </header>
+  <section class="panel score">
+    <div class="grade" aria-label="Оценка ${g}">${g}</div>
+    <div><div class="big">${good} из ${n}</div><p>${pct}% верных ответов. ${msg}</p></div>
+  </section>
+  <section class="panel">
+    <div class="label">По темам</div>
+    <div class="tstats">${TOPICS.filter(t=>by[t.id]).map(t=>{const s=by[t.id],p=Math.round(s.ok/s.n*100);
+      return `<div class="ts"><div>${t.name}</div><div class="v">${s.ok}/${s.n}</div>
+      <div class="tb"><i style="width:${p}%;background:${p>=70?"var(--ok)":p>=50?"var(--sun)":"var(--bad)"}"></i></div></div>`}).join("")}</div>
+  </section>
+  ${wrong.length?`<section class="panel">
+    <div class="label">Ошибки (${wrong.length})</div>
+    <div class="mist">${wrong.map(r=>`<div class="mi"><div class="mq">${esc(r.q.q)}</div>
+      <div class="mg">Твой ответ: ${esc(r.given)}</div>
+      <div class="mc">Правильно: ${esc(correctText(r.q))}</div>
+      <div class="mp">${esc(r.q.e)} Учебник, с. ${r.q.p}</div></div>`).join("")}</div>
+  </section>`:""}
+  <div class="actions">
+    ${wrong.length?`<button class="btn" id="retry">Работа над ошибками</button>`:""}
+    <button class="btn ${wrong.length?"ghost":""}" id="again">Пройти заново</button>
+    <button class="btn ghost" id="home">Выбрать темы</button>
+  </div>
+  <p class="note">Оценка примерная: 90% и больше — 5, от 70% — 4, от 50% — 3.</p>`;
+  window.scrollTo({top:0});
+  if(wrong.length) $("#retry").onclick=()=>startSession(shuffle(wrong.map(r=>r.q)),"train",true);
+  $("#again").onclick=()=>{const ids=S.list.map(q=>q);startSession(shuffle(ids),S.mode,S.isRetry)};
+  $("#home").onclick=renderStart;
+}
+
+renderStart();
+</script>
+</body>
+</html>
